@@ -1,0 +1,57 @@
+<body>
+
+<h2>Create Todo</h2>
+
+<form id="todoForm">
+    <input type="text" id="itemName" placeholder="Item Name" required><br><br>
+    <textarea id="itemDescription" placeholder="Item Description" required></textarea><br><br>
+    <button type="submit">Submit</button>
+</form>
+
+<h2>Todo List</h2>
+<ul id="todoList"></ul>
+
+<script>
+
+// LOAD TODOS WHEN PAGE OPENS
+async function loadTodos(){
+    const response = await fetch("/gettodos");
+    const todos = await response.json();
+
+    const list = document.getElementById("todoList");
+    list.innerHTML = "";
+
+    todos.forEach(todo => {
+        const li = document.createElement("li");
+        li.innerHTML = `<b>${todo.itemName}</b>: ${todo.itemDescription}`;
+        list.appendChild(li);
+    });
+}
+
+// SUBMIT FORM
+document.getElementById("todoForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    await fetch("/submittodoitem", {
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+            itemName: document.getElementById("itemName").value,
+            itemDescription: document.getElementById("itemDescription").value
+        })
+    });
+
+    document.getElementById("todoForm").reset();
+
+    // 🔥 Reload todos instantly
+    loadTodos();
+});
+
+// LOAD ON START
+loadTodos();
+
+</script>
+
+</body>
