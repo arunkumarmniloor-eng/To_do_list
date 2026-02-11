@@ -1,26 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>To-Do App</title>
+
+<style>
+
+body{
+    font-family: Arial;
+    background: linear-gradient(135deg,#74ebd5,#ACB6E5);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.container{
+    background:white;
+    padding:30px;
+    border-radius:10px;
+    width:400px;
+    box-shadow:0 10px 20px rgba(0,0,0,0.2);
+}
+
+.hidden{
+    display:none;
+}
+
+input, textarea{
+    width:100%;
+    padding:10px;
+    margin-top:8px;
+    margin-bottom:15px;
+    border-radius:6px;
+    border:1px solid #ccc;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    background:#4CAF50;
+    color:white;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#45a049;
+}
+
+li{
+    background:#f2f2f2;
+    margin-top:10px;
+    padding:10px;
+    border-radius:6px;
+}
+
+</style>
+</head>
+
 <body>
 
-<h2> To_do_list </h2>
+<div class="container">
+
+<!-- ✅ FORM -->
+<div id="formSection">
+
+<h2>Create Todo</h2>
 
 <form id="todoForm">
-    <input type="text" id="itemName" placeholder="Item Name" required><br><br>
-    <textarea id="itemDescription" placeholder="Item Description" required></textarea><br><br>
-    <label>Item ID:</label>
-    <input type="text" name="itemId" />
-    <label>Item UUID:</label>
-    <input type="text" name="itemUUID" />
-    <label>Item Hash:</label>
-    <input type="text" name="itemHash" />
-    <button type="submit">Submit</button>
+
+<input type="text" id="itemName" placeholder="Item Name" required>
+
+<textarea id="itemDescription" placeholder="Item Description" required></textarea>
+
+<input type="text" id="itemId" placeholder="Item ID">
+
+<input type="text" id="itemUUID" placeholder="Item UUID">
+
+<input type="text" id="itemHash" placeholder="Item Hash">
+
+<button type="submit">Submit</button>
+
 </form>
+</div>
+
+
+<!-- ✅ TODO LIST (HIDDEN INITIALLY) -->
+<div id="listSection" class="hidden">
 
 <h2>Todo List</h2>
+
 <ul id="todoList"></ul>
+
+<button onclick="goBack()">➜ Add Another Todo</button>
+
+</div>
+
+</div>
 
 <script>
 
-// LOAD TODOS WHEN PAGE OPENS
+// LOAD TODOS
 async function loadTodos(){
+
     const response = await fetch("/gettodos");
     const todos = await response.json();
 
@@ -28,25 +111,38 @@ async function loadTodos(){
     list.innerHTML = "";
 
     todos.forEach(todo => {
+
         const li = document.createElement("li");
-        li.innerHTML = `<b>${todo.itemName}</b>: ${todo.itemDescription}`;
+
+        li.innerHTML = `
+        <b>${todo.itemName}</b><br>
+        ${todo.itemDescription}<br>
+        ID: ${todo.itemId || "N/A"}<br>
+        UUID: ${todo.itemUUID || "N/A"}<br>
+        Hash: ${todo.itemHash || "N/A"}
+        `;
+
         list.appendChild(li);
     });
 }
 
+
 // SUBMIT FORM
 document.getElementById("todoForm").addEventListener("submit", async function(e){
+
     e.preventDefault();
+
+    const itemName = document.getElementById("itemName").value;
+    const itemDescription = document.getElementById("itemDescription").value;
+    const itemId = document.getElementById("itemId").value;
+    const itemUUID = document.getElementById("itemUUID").value;
+    const itemHash = document.getElementById("itemHash").value;
 
     await fetch("/submittodoitem", {
         method:"POST",
         headers:{
             "Content-Type":"application/json"
         },
-       const itemId = document.getElementById("itemId").value;
-       const itemUUID = document.getElementById("itemUUID").value;
-       const itemHash = document.getElementById("itemHash").value;
-
         body: JSON.stringify({
             itemName,
             itemDescription,
@@ -54,18 +150,28 @@ document.getElementById("todoForm").addEventListener("submit", async function(e)
             itemUUID,
             itemHash
         })
-
     });
 
-    document.getElementById("todoForm").reset();
+    // Hide form
+    document.getElementById("formSection").classList.add("hidden");
 
-    // 🔥 Reload todos instantly
+    // Show list
+    document.getElementById("listSection").classList.remove("hidden");
+
     loadTodos();
 });
 
-// LOAD ON START
-loadTodos();
+
+// GO BACK TO FORM
+function goBack(){
+
+    document.getElementById("listSection").classList.add("hidden");
+    document.getElementById("formSection").classList.remove("hidden");
+
+    document.getElementById("todoForm").reset();
+}
 
 </script>
 
 </body>
+</html>

@@ -49,33 +49,21 @@ def home():
 
 
 @app.route("/submittodoitem", methods=["POST"])
-def submit_todo_item():
-    try:
-        data = request.get_json(force=True)
+def submit_todo():
 
-        print("Incoming Data:", data)  # Debug
+    data = request.get_json()
 
-        item_name = data.get("itemName")
-        item_description = data.get("itemDescription")
+    mongo.db.todos.insert_one({
+        "itemName": data.get("itemName"),
+        "itemDescription": data.get("itemDescription"),
+        "itemId": data.get("itemId"),
+        "itemUUID": data.get("itemUUID"),
+        "itemHash": data.get("itemHash")
+    })
 
-        if not item_name or not item_description:
-            return jsonify({"error": "Both fields required"}), 400
+    return jsonify({"message":"Todo added"})
 
-        result = mongo.db.todos.insert_one({
-            "itemName": item_name,
-            "itemDescription": item_description
-        })
-
-        print("✅ Inserted ID:", result.inserted_id)
-
-        return jsonify({
-            "message": "Todo added successfully!"
-        }), 201
-
-    except Exception as e:
-        print("🔥 FULL ERROR BELOW 🔥")
-        traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
+ 
     
 @app.route("/gettodos", methods=["GET"])
 def get_todos():
