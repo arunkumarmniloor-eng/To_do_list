@@ -43,10 +43,18 @@ document.getElementById("todoForm").addEventListener("submit", async function(e)
         headers:{
             "Content-Type":"application/json"
         },
+       const itemId = document.getElementById("itemId").value;
+       const itemUUID = document.getElementById("itemUUID").value;
+       const itemHash = document.getElementById("itemHash").value;
+
         body: JSON.stringify({
-            itemName: document.getElementById("itemName").value,
-            itemDescription: document.getElementById("itemDescription").value
+            itemName,
+            itemDescription,
+            itemId,
+            itemUUID,
+            itemHash
         })
+
     });
 
     document.getElementById("todoForm").reset();
